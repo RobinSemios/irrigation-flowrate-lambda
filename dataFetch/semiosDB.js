@@ -8,7 +8,6 @@ const semiosDB = async (event, context) => {
   let client;
   try {
     client = await pool.connect();
-    console.log("connected to semios db")
   } catch (error) {
     console.error({
       issue: 'Issue connecting to pool',
@@ -22,23 +21,33 @@ const semiosDB = async (event, context) => {
 
   */
 
-  let irrigation;
-  try {
-    // eslint-disable-next-line max-len
-    irrigation = await client.query(sql.integrations.irrigationProperties, []).then((r) => r.rows);
-  } catch (error) {
-    console.error({
-      issue: 'Issue',
-      error,
+    let irrigationZonesInfo;
+    const uniqueEntries = {};
+    
+    try {
+      irrigationZonesInfo = await client.query(sql.integrations.irrigationProperties, []).then((r) => r.rows);
+    } catch (error) {
+      console.error({
+        issue: 'Issue',
+        error,
+      });
+    }
+    
+    client.release();
+    
+    irrigationZonesInfo.forEach(row => {
+      const externalPropertyId = row.externalPropertyId;
+      const apiKey = row.apiKey;
+      const apiSecret = row.apiSecret;
+    
+      // If the external property id is not in the uniqueEntries object, add it along with its corresponding API key and API secret
+      if (!uniqueEntries[externalPropertyId]) {
+          uniqueEntries[externalPropertyId] = { apiKey, apiSecret };
+      }
     });
-  }
-  client.release();
-
-  return irrigation;
+    
+    return irrigationZonesInfo,uniqueEntries;
+    
 };
-
-/*semiosDB()
-  .then(() => pool.end()) // Close the pool after execution
-  .catch(error => console.error('Error in semiosDB:', error));*/
   
 module.exports = semiosDB;

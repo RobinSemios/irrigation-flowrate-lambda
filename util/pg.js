@@ -1,8 +1,7 @@
 'use strict';
 
 // Require dotenv and configure it to load your environment variables
-require('dotenv').config({ path: '.env.production' }
-);
+require('dotenv').config({ path: '.env.production' });
 const pg = require('pg');
 
 // instantiate a new client
