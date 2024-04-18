@@ -5,6 +5,7 @@ const { AltracClient } = require('../util/altracApiClient');
 const AltracApiHelper = require('../util/altrac');
 const { decryptAES } = require('../util/encryptionHelper');
 const semiosDB = require('./semiosDB');
+const fs = require('fs');
 
 const getAltracClient = async (apiKey, apiSecret) => {
   const credentials = AltracApiHelper.altracClient;
@@ -28,6 +29,7 @@ const altrac = async () => {
       const altracClient = await getAltracClient(apiKey, apiSecret);
       const results = await altracClient.get(`zones/${externalCustomerId}`);
       allResults.push({ externalCustomerId, results });
+      console.log(results);
     } catch (error) {
       console.error({
         issue: `Issue getting data for ID: ${externalCustomerId}`,
@@ -50,5 +52,9 @@ const altrac = async () => {
       console.log(JSON.stringify(result.geom, null, 2));
     });
   });*/
+    // Write results to a JSON file
+  fs.writeFileSync('all_results.json', JSON.stringify(allResults, null, 2));
+
+  console.log("All Results have been written to all_results.json");
 };
 altrac();
